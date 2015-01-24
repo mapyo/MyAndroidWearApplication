@@ -1,12 +1,19 @@
 package com.mapyo.myandroidwearapplication;
 
+import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.os.Bundle;
-import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.view.SurfaceHolder;
+
+import android.support.wearable.watchface.CanvasWatchFaceService;
+import android.support.wearable.watchface.WatchFaceService;
+import android.support.wearable.watchface.WatchFaceStyle;
+
 
 public class AnalogWatchFaceService extends CanvasWatchFaceService {
 
-    public Engine onCreateEngin() {
+    @Override
+    public Engine onCreateEngine() {
         /* provide your watch face implementation */
         return new Engine();
     }
@@ -28,7 +35,25 @@ public class AnalogWatchFaceService extends CanvasWatchFaceService {
 
         @Override
         public void onTimeTick() {
+            super.onTimeTick();
+            /* the time changed */
+        }
 
+        @Override
+        public void onAmbientModeChanged(boolean inAmbientMode) {
+            super.onAmbientModeChanged(inAmbientMode);
+            /* the whearable switched between modes */
+        }
+
+        @Override
+        public void onDraw(Canvas canvas, Rect bounds) {
+            /* draw your watch face */
+        }
+
+        @Override
+        public void onVisibilityChanged(boolean visible) {
+            super.onVisibilityChanged(visible);
+            /* the watch face became visible on invisible */
         }
     }
 }
