@@ -1,18 +1,30 @@
 package com.mapyo.myandroidwearapplication;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.view.SurfaceHolder;
-
+import android.os.Handler;
+import android.os.Message;
 import android.support.wearable.watchface.CanvasWatchFaceService;
-import android.support.wearable.watchface.WatchFaceService;
-import android.support.wearable.watchface.WatchFaceStyle;
+import android.view.SurfaceHolder;
+import android.text.format.Time;
+
+import java.util.concurrent.TimeUnit;
 
 
 public class AnalogWatchFaceService extends CanvasWatchFaceService {
 
-    @Override
+    /**
+     * Upadte rate in milliseconds for interactive mode.
+     * We update once a second to advace the second hand.
+     */
+    private static final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.SECONDS.toMillis(1);
+
     public Engine onCreateEngine() {
         /* provide your watch face implementation */
         return new Engine();
@@ -20,6 +32,46 @@ public class AnalogWatchFaceService extends CanvasWatchFaceService {
 
     /* implement service callback methods */
     private class Engine extends CanvasWatchFaceService.Engine {
+        static final int MSG_UPDATE_TIME = 0;
+
+        /* a time object */
+        Time mTime;
+
+        /* device features */
+        boolean mLowBitAmbient;
+
+        /* graphic objects */
+        Bitmap mBackgroundBitmap;
+        Bitmap mBackgroundScaledBitmap;
+        Paint mHourPaint;
+        Paint mMinutePaint;
+
+        /* handler to update the time once a second in interactive mode */
+        final Handler mUpdateTimeHandler = new Handler() {
+            @Override
+            public void handleMessage(Message message) {
+                switch (message.what) {
+                    case MSG_UPDATE_TIME:
+                        invalidate();
+                        if(shouldTimerBeRunning()) {
+                            long timeMs = System.currentTimeMillis();
+                            long delayMs = INTERACTIVE_UPDATE_RATE_MS
+                                    - (timeMs % INTERACTIVE_UPDATE_RATE_MS);
+                            mUpdateTimeHandler.sendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
+                        }
+                        break;
+                }
+            }
+        };
+
+        /* receiver to update the time zone */
+        final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                mTime.clear(intent.getStringExtra("time-zone"));
+                mTime.setToNow();
+            }
+        };
 
         @Override
         public void onCreate(SurfaceHolder holder) {

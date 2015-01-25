@@ -4,5 +4,6 @@
     <string name="app_name">MyAndroidWearApplication</string>
     <string name="hello_round">Hello Round World!</string>
     <string name="hello_square">Hello Square World!!!!!!!!!!!aaaaaaaaaa</string>
+    <string name="analog_name">Sample Analog</string>
 
 </resources>
