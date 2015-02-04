@@ -3,6 +3,7 @@ package com.mapyo.myandroidwearapplication;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -17,6 +18,7 @@ import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.view.SurfaceHolder;
 import android.text.format.Time;
 
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 
@@ -76,6 +78,8 @@ public class AnalogWatchFaceService extends CanvasWatchFaceService {
             }
         };
 
+        boolean mRegisteredTimeZoneReceiver = false;
+
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
@@ -124,6 +128,46 @@ public class AnalogWatchFaceService extends CanvasWatchFaceService {
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
             /* the watch face became visible on invisible */
+
+            if(visible) {
+                registerReceiver();
+
+                // Update time zone in case it changed while we weren't visible.
+                mTime.clear(TimeZone.getDefault().getID());
+                mTime.setToNow();
+            } else {
+                unregisterReceiver();
+            }
+
+            updateTimer();
+        }
+
+        private void updateTimer() {
+            mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
+            if(shouldTimerBeRunning()) {
+                mUpdateTimeHandler.sendEmptyMessage(MSG_UPDATE_TIME);
+            }
+        }
+
+        private boolean shouldTimerBeRunning() {
+            return isVisible() && !isInAmbientMode();
+        }
+
+        private void registerReceiver() {
+            if(mRegisteredTimeZoneReceiver) {
+                return;
+            }
+            mRegisteredTimeZoneReceiver = true;
+            IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
+            AnalogWatchFaceService.this.registerReceiver(mTimeZoneReceiver, filter);
+        }
+
+        private void unregisterReceiver() {
+            if(!mRegisteredTimeZoneReceiver) {
+                return;
+            }
+            mRegisteredTimeZoneReceiver = false;
+            AnalogWatchFaceService.this.unregisterReceiver(mTimeZoneReceiver);
         }
     }
 }
