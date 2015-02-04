@@ -3,10 +3,13 @@ package com.mapyo.myandroidwearapplication;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -77,6 +80,21 @@ public class AnalogWatchFaceService extends CanvasWatchFaceService {
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
             /* initialize your watch face */
+
+            /* load the background image */
+            Resources resources = AnalogWatchFaceService.this.getResources();
+            Drawable backgroundDrawable = resources.getDrawable(R.drawable.bg);
+            mBackgroundBitmap = ((BitmapDrawable)backgroundDrawable).getBitmap();
+
+            /* create graphic styles */
+            mHourPaint = new Paint();
+            mHourPaint.setARGB(255, 200, 200, 200);
+            mHourPaint.setStrokeWidth(5.0f);
+            mHourPaint.setAntiAlias(true);
+            mHourPaint.setStrokeCap(Paint.Cap.ROUND);
+
+            /* allocate an object to hold the time */
+            mTime = new Time();
         }
 
         @Override
